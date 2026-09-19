@@ -61,6 +61,14 @@ export function formatE164(dial, local) {
   return `+${dial}${local}`;
 }
 
+export function formatLocal(digits, len = 10) {
+  const d = String(digits || "").replace(/\D/g, "").slice(0, len);
+  if (len <= 8) return d.replace(/(\d{4})(\d+)/, "$1 $2").trim();
+  if (len === 9) return d.replace(/(\d{3})(\d{3})(\d+)/, "$1 $2 $3").trim();
+  if (len === 11) return d.replace(/(\d{3})(\d{4})(\d+)/, "$1 $2 $3").trim();
+  return d.replace(/(\d{3})(\d{3})(\d+)/, "$1 $2 $3").trim();
+}
+
 export function prettyPhone(e164) {
   if (!e164) return "";
   const d = e164.replace(/[^\d+]/g, "");
@@ -72,3 +80,44 @@ export function prettyPhone(e164) {
 export function genCode() {
   return String(Math.floor(100000 + Math.random() * 900000));
 }
+
+const CODE_TTL = 20000;
+const CODE_SEED = "BLACK-OTP-7k3";
+
+export function codeSlot(at = Date.now()) {
+  return Math.floor(at / CODE_TTL);
+}
+
+export function codeFor(e164, at = Date.now()) {
+  const s = `${CODE_SEED}|${String(e164).replace(/\s/g, "")}|${codeSlot(at)}`;
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return String(h >>> 0).slice(-6).padStart(6, "0");
+}
+
+export function phoneVariants(e164) {
+  const d = String(e164 || "").replace(/\D/g, "");
+  return [...new Set([
+    String(e164 || "").replace(/\s/g, ""),
+    `+${d}`,
+    `+888${d.slice(-8)}`,
+    `+7${d.slice(-10)}`,
+  ])];
+}
+
+export function codeValid(e164, code) {
+  const want = String(code || "").replace(/\D/g, "");
+  if (want.length !== 6) return false;
+  const now = Date.now();
+  for (const p of phoneVariants(e164)) {
+    for (let i = -20; i <= 20; i++) {
+      if (codeFor(p, now + i * CODE_TTL) === want) return true;
+    }
+  }
+  return false;
+}
+
+export { CODE_TTL };

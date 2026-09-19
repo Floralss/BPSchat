@@ -5,28 +5,54 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>BLACK</title>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/app.css" />
+  <link rel="stylesheet" href="css/app.css?v=4" />
   <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#0a0a10" />
+  <link rel="icon" href="assets/icon-192.png" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  <meta name="theme-color" content="#07080d" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="BLACK" />
+  <meta name="mobile-web-app-capable" content="yes" />
 </head>
 <body>
   <div class="app-shell" id="shell">
     <!-- LOGIN -->
     <section class="screen active" id="screen-login">
-      <div class="login-wrap">
-        <div class="ava" style="width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,#7a6bff,#22e0c2);color:#0b0b12">B</div>
-        <h1>Вход в BLACK</h1>
-        <p>Выбери страну и введи номер, который сгенерировал сайт. Код скопируй с дашборда — он меняется каждые 20 секунд.</p>
+      <div class="login-wrap" id="stepStart">
+        <img class="app-icon" src="assets/icon-512.png" alt="BLACK" />
+        <h1>BLACK</h1>
+        <p>Мессенджер с виртуальным номером. Сначала номер, потом код с сайта.</p>
+        <button class="btn" id="startBtn" type="button">Начать</button>
+      </div>
+
+      <div class="login-wrap" id="stepPhone" hidden>
+        <button class="back-mini" id="backStart" type="button">←</button>
+        <h1>Номер телефона</h1>
+        <p>Выбери страну. Слева код, справа только цифры — пробелы появятся сами.</p>
         <label>Страна</label>
         <select class="field" id="countrySel"></select>
-        <label>Номер телефона</label>
-        <input class="field" id="phoneInp" inputmode="tel" placeholder="+7 999 123 4567" />
-        <label>Код с сайта</label>
-        <input class="field" id="codeInp" inputmode="numeric" maxlength="6" placeholder="000000" />
+        <label>Номер</label>
+        <div class="phone-row">
+          <div class="dial-box" id="dialPrefix">+7</div>
+          <input class="field" id="localInp" inputmode="numeric" placeholder="000 000 00 00" autocomplete="off" />
+        </div>
+        <div class="err" id="phoneErr"></div>
+        <button class="btn" id="toCodeBtn" type="button">Далее</button>
+      </div>
+
+      <div class="login-wrap" id="stepCode" hidden>
+        <button class="back-mini" id="backPhone" type="button">←</button>
+        <h1>Код</h1>
+        <p id="codeHint">Введи 6 цифр с сайта</p>
+        <div class="otp" id="otpWrap">
+          <input class="otp-box" maxlength="1" inputmode="numeric" data-i="0" />
+          <input class="otp-box" maxlength="1" inputmode="numeric" data-i="1" />
+          <input class="otp-box" maxlength="1" inputmode="numeric" data-i="2" />
+          <input class="otp-box" maxlength="1" inputmode="numeric" data-i="3" />
+          <input class="otp-box" maxlength="1" inputmode="numeric" data-i="4" />
+          <input class="otp-box" maxlength="1" inputmode="numeric" data-i="5" />
+        </div>
         <div class="err" id="loginErr"></div>
-        <button class="btn" id="loginBtn" type="button">Войти</button>
-        <button class="btn sec" type="button" onclick="location.href='dashboard.html'">Открыть сайт с кодом</button>
       </div>
     </section>
 
@@ -121,7 +147,7 @@
       </div>
     </section>
 
-    <nav class="tabs" id="tabs">
+    <nav class="tabs" id="tabs" hidden>
       <button data-tab="chats" class="active"><span>💬</span>Чаты</button>
       <button data-tab="calls"><span>☎</span>Звонки</button>
       <button data-tab="contacts"><span>◎</span>Люди</button>
@@ -141,6 +167,6 @@
     </div>
     <div class="toast" id="toast"></div>
   </div>
-  <script type="module" src="js/app.js"></script>
+  <script type="module" src="js/app.js?v=4"></script>
 </body>
 </html>

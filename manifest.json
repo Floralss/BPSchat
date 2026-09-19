@@ -1,9 +1,17 @@
 {
-  "name": "BLACK Messenger",
+  "name": "BLACK",
   "short_name": "BLACK",
+  "description": "Мессенджер BLACK",
   "start_url": "app.html",
+  "scope": ".",
   "display": "standalone",
-  "background_color": "#0a0a10",
-  "theme_color": "#0a0a10",
-  "lang": "ru"
+  "orientation": "portrait",
+  "background_color": "#07080d",
+  "theme_color": "#07080d",
+  "lang": "ru",
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
 }

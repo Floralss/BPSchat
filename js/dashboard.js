@@ -1,9 +1,8 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 import { ref, set, update, push } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
-import { COUNTRIES, randomDigits, formatE164, prettyPhone, genCode } from "./countries.js";
+import { COUNTRIES, randomDigits, formatE164, prettyPhone, codeFor, CODE_TTL } from "./countries.js";
 
-const CODE_TTL = 20000;
 const START_CREDITS = 3;
 
 let user = null;
@@ -125,9 +124,9 @@ function generate() {
     paid: !!selected.paid,
     ownerUid: user?.uid || "local",
     ownerEmail: user?.email || "",
-    currentCode: genCode(),
+    currentCode: codeFor(e164, now),
     updatedAt: now,
-    expiresAt: now + CODE_TTL,
+    expiresAt: Math.floor(now / CODE_TTL) * CODE_TTL + CODE_TTL,
     createdAt: now,
   };
 
@@ -173,8 +172,8 @@ function renderLocalNumbers() {
         e164,
         country: items.find((x) => x.e164 === e164)?.country || "",
         paid: String(e164).startsWith("+888"),
-        currentCode: genCode(),
-        expiresAt: Date.now() + CODE_TTL,
+        currentCode: codeFor(e164),
+        expiresAt: Math.floor(Date.now() / CODE_TTL) * CODE_TTL + CODE_TTL,
       });
     };
   });
@@ -196,24 +195,27 @@ function startRotation() {
 function rotateIfNeeded() {
   if (!activeNumber) return;
   const now = Date.now();
-  if (!activeNumber.expiresAt || now >= activeNumber.expiresAt) {
+  const next = Math.floor(now / CODE_TTL) * CODE_TTL + CODE_TTL;
+  const code = codeFor(activeNumber.e164, now);
+  if (activeNumber.currentCode !== code) {
     activeNumber = {
       ...activeNumber,
-      currentCode: genCode(),
+      currentCode: code,
       updatedAt: now,
-      expiresAt: now + CODE_TTL,
+      expiresAt: next,
     };
     saveNumber(activeNumber);
     if (user) {
       update(ref(db, `virtualNumbers/${sanitize(activeNumber.e164)}`), {
-        currentCode: activeNumber.currentCode,
+        currentCode: code,
         updatedAt: now,
-        expiresAt: activeNumber.expiresAt,
+        expiresAt: next,
       }).catch(() => {});
     }
   }
+  activeNumber.expiresAt = next;
   const left = Math.max(0, (activeNumber.expiresAt || now) - now);
-  $("codeView").textContent = activeNumber.currentCode || "------";
+  $("codeView").textContent = code;
   $("timerView").textContent = `обновится через ${(left / 1000).toFixed(1)} сек`;
   $("bar").style.transform = `scaleX(${left / CODE_TTL})`;
 }

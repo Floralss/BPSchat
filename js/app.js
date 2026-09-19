@@ -11,7 +11,9 @@ import {
   limitToLast,
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
 import { ref as sref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-storage.js";
-import { COUNTRIES, prettyPhone } from "./countries.js";
+import { COUNTRIES, prettyPhone, codeValid, formatLocal } from "./countries.js";
+
+let pendingPhone = "";
 
 const $ = (id) => document.getElementById(id);
 const SESSION_KEY = "black_session";
@@ -61,7 +63,7 @@ init();
 async function init() {
   fillCountries();
   bindTabs();
-  $("loginBtn").onclick = login;
+  bindLoginFlow();
   $("backChats").onclick = () => show("chats");
   $("backSet").onclick = () => show("settings");
   $("sendBtn").onclick = sendText;
@@ -90,6 +92,7 @@ async function init() {
   $("saveProf").onclick = saveProfile;
   $("logoutBtn").onclick = logout;
   $("chatSearch").oninput = renderChatList;
+  setupPWA();
 
   if (session?.e164) {
     await ensureAnonAuth();
@@ -97,15 +100,122 @@ async function init() {
   }
 }
 
+function setupPWA() {
+  const banner = $("installBanner");
+  const btn = $("installBtn");
+  if (banner) banner.classList.add("show");
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  }
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    if (btn) {
+      btn.style.display = "block";
+      btn.onclick = async () => {
+        e.prompt();
+        btn.style.display = "none";
+      };
+    }
+  });
+}
+
 function fillCountries() {
   $("countrySel").innerHTML = COUNTRIES.map(
-    (c) => `<option value="${c.iso}|${c.dial}">${c.flag} ${c.name} (+${c.dial})</option>`
+    (c) => `<option value="${c.iso}|${c.dial}">${c.flag} ${c.name}</option>`
   ).join("");
+  $("countrySel").value = "ANON|888";
+  updateDial();
+  $("countrySel").onchange = () => {
+    updateDial();
+    formatPhoneField();
+  };
+}
+
+function selectedCountry() {
+  const [iso, dial] = String($("countrySel").value || "ANON|888").split("|");
+  return COUNTRIES.find((c) => c.iso === iso && c.dial === dial) || COUNTRIES[0];
+}
+
+function updateDial() {
+  $("dialPrefix").textContent = `+${selectedCountry().dial}`;
+}
+
+function formatPhoneField() {
+  const c = selectedCountry();
+  const raw = String($("localInp").value || "").replace(/\D/g, "").slice(0, c.len);
+  $("localInp").value = formatLocal(raw, c.len);
+}
+
+function showLoginStep(id) {
+  ["stepStart", "stepPhone", "stepCode"].forEach((s) => {
+    $(s).hidden = s !== id;
+  });
+}
+
+function bindLoginFlow() {
+  $("startBtn").onclick = () => showLoginStep("stepPhone");
+  $("backStart").onclick = () => showLoginStep("stepStart");
+  $("backPhone").onclick = () => showLoginStep("stepPhone");
+  $("localInp").addEventListener("input", formatPhoneField);
+  $("toCodeBtn").onclick = goToCode;
+  document.querySelectorAll(".otp-box").forEach((box) => {
+    box.addEventListener("input", onOtpInput);
+    box.addEventListener("keydown", onOtpKey);
+    box.addEventListener("paste", onOtpPaste);
+  });
+}
+
+function goToCode() {
+  const c = selectedCountry();
+  const local = String($("localInp").value || "").replace(/\D/g, "");
+  if (local.length < Math.min(6, c.len)) {
+    $("phoneErr").textContent = "Введи номер целиком.";
+    return;
+  }
+  $("phoneErr").textContent = "";
+  pendingPhone = `+${c.dial}${local}`;
+  $("codeHint").textContent = `Номер ${prettyPhone(pendingPhone)}. Бери код, который сейчас крупно на сайте.`;
+  document.querySelectorAll(".otp-box").forEach((b) => (b.value = ""));
+  $("otpWrap").classList.remove("ok", "bad");
+  $("loginErr").textContent = "";
+  showLoginStep("stepCode");
+  document.querySelector(".otp-box").focus();
+}
+
+function otpValue() {
+  return [...document.querySelectorAll(".otp-box")].map((b) => b.value).join("");
+}
+
+function onOtpInput(e) {
+  const i = Number(e.target.dataset.i);
+  e.target.value = e.target.value.replace(/\D/g, "").slice(-1);
+  if (e.target.value && i < 5) document.querySelector(`.otp-box[data-i="${i + 1}"]`).focus();
+  if (otpValue().length === 6) login();
+}
+
+function onOtpKey(e) {
+  const i = Number(e.target.dataset.i);
+  if (e.key === "Backspace" && !e.target.value && i > 0) {
+    const prev = document.querySelector(`.otp-box[data-i="${i - 1}"]`);
+    prev.value = "";
+    prev.focus();
+  }
+}
+
+function onOtpPaste(e) {
+  e.preventDefault();
+  const d = (e.clipboardData.getData("text") || "").replace(/\D/g, "").slice(0, 6);
+  document.querySelectorAll(".otp-box").forEach((b, i) => (b.value = d[i] || ""));
+  if (d.length === 6) login();
 }
 
 function bindTabs() {
   document.querySelectorAll("#tabs button").forEach((b) => {
     b.onclick = () => {
+      if (!session) {
+        show("login");
+        return;
+      }
       document.querySelectorAll("#tabs button").forEach((x) => x.classList.remove("active"));
       b.classList.add("active");
       show(b.dataset.tab);
@@ -114,6 +224,7 @@ function bindTabs() {
 }
 
 function show(name) {
+  if (!session && name !== "login") name = "login";
   document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
   const map = {
     login: "screen-login",
@@ -125,7 +236,9 @@ function show(name) {
     profile: "screen-profile",
   };
   $(map[name]).classList.add("active");
-  $("tabs").style.display = ["login", "chat", "profile"].includes(name) ? "none" : "grid";
+  const hideTabs = !session || ["login", "chat", "profile"].includes(name);
+  $("tabs").hidden = hideTabs;
+  $("tabs").style.display = hideTabs ? "none" : "grid";
   if (name === "chats") renderChatList();
   if (name === "calls") renderCalls();
   if (name === "contacts") renderPeople();
@@ -144,56 +257,45 @@ function normalizePhone(raw) {
 async function login() {
   const err = $("loginErr");
   err.textContent = "";
-  const e164 = normalizePhone($("phoneInp").value);
-  const code = $("codeInp").value.trim();
-  if (e164.length < 8 || code.length !== 6) {
-    err.textContent = "Проверь номер и 6-значный код.";
+  const wrap = $("otpWrap");
+  wrap.classList.remove("ok", "bad", "shake");
+  const e164 = pendingPhone || `+${selectedCountry().dial}${String($("localInp").value || "").replace(/\D/g, "")}`;
+  const code = otpValue();
+  if (code.length !== 6) return;
+  if (!codeValid(e164, code)) {
+    wrap.classList.add("bad", "shake");
+    try { navigator.vibrate([80, 40, 80]); } catch (_) {}
+    err.textContent = "Неверный код. Возьми новый с сайта.";
+    setTimeout(() => wrap.classList.remove("shake"), 500);
     return;
   }
+  wrap.classList.add("ok");
   try {
-    let rec = null;
-    try {
-      const local = localStorage.getItem(`black_virtual_${sanitize(e164)}`);
-      if (local) rec = JSON.parse(local);
-    } catch (_) {}
-    try {
-      const snap = await get(ref(db, `virtualNumbers/${sanitize(e164)}`));
-      if (snap.exists()) rec = snap.val();
-    } catch (_) {}
-    if (!rec) {
-      err.textContent = "Номер не найден. Сначала выпусти его на сайте.";
-      return;
-    }
-    if (String(rec.currentCode) !== code) {
-      err.textContent = "Код неверный или уже обновился. Скопируй свежий с сайта.";
-      return;
-    }
-    if (rec.expiresAt && Date.now() > rec.expiresAt + 2000) {
-      err.textContent = "Код истёк. Подожди новый на сайте.";
-      return;
-    }
     await ensureAnonAuth();
-    const name = rec.ownerEmail?.split("@")[0] || "User";
+    const paid = selectedCountry().iso === "ANON";
     session = {
       e164,
-      name,
-      emoji: rec.paid ? "◈" : "✦",
-      color: rec.paid ? "#22e0c2" : "#6d5cff",
+      name: "User",
+      emoji: paid ? "◈" : "✦",
+      color: paid ? "#22e0c2" : "#6d5cff",
       bio: "",
-      country: rec.country,
+      country: selectedCountry().name,
       uid: auth.currentUser?.uid || null,
-      ownerUid: rec.ownerUid || null,
     };
     localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-    await set(ref(db, `directory/${sanitize(e164)}`), {
-      e164,
-      name: session.name,
-      emoji: session.emoji,
-      lastLogin: Date.now(),
-    });
-    enterApp();
+    try {
+      await set(ref(db, `directory/${sanitize(e164)}`), {
+        e164,
+        name: session.name,
+        emoji: session.emoji,
+        lastLogin: Date.now(),
+      });
+    } catch (_) {}
+    setTimeout(() => enterApp(), 450);
   } catch (e) {
-    err.textContent = e.message || "Не удалось проверить код. Открой правила Firebase RTDB.";
+    wrap.classList.add("bad", "shake");
+    try { navigator.vibrate(120); } catch (_) {}
+    err.textContent = e.message || "Ошибка входа.";
   }
 }
 
@@ -211,6 +313,7 @@ function enterApp() {
   $("myName").textContent = session.name;
   $("myPhone").textContent = prettyPhone(session.e164);
   paintAva($("myAva"), session);
+  $("tabs").hidden = false;
   show("chats");
 }
 
@@ -531,6 +634,7 @@ function logout() {
   localStorage.removeItem(SESSION_KEY);
   session = null;
   show("login");
+  showLoginStep("stepStart");
 }
 
 function toast(t) {
