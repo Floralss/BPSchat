@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Номера — BLACK</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="wrap">
+    <nav class="nav">
+      <a class="brand" href="index.html"><div class="logo">B</div> BLACK</a>
+      <div class="nav-links">
+        <a href="app.html">Приложение</a>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span id="who" style="color:var(--muted);font-size:13px"></span>
+        <button class="btn btn-ghost" id="outBtn" type="button">Выйти</button>
+      </div>
+    </nav>
+
+    <div class="dash-head">
+      <div>
+        <h1>Виртуальные номера</h1>
+        <p style="color:var(--muted);margin-top:6px">Выбери страну, сгенерируй номер и скопируй код в приложение. Код живёт 20 секунд.</p>
+      </div>
+      <div class="credits">
+        <div>
+          <div style="font-size:11px;color:var(--muted)">Кредиты</div>
+          <div id="creditsVal" style="font-weight:800">—</div>
+        </div>
+        <button class="btn btn-primary" id="buyBtn" type="button">+10 демо</button>
+      </div>
+    </div>
+
+    <div class="gen-layout">
+      <div class="card">
+        <h3>Страна</h3>
+        <p style="color:var(--muted);font-size:13px;margin:6px 0 12px">+888 анонимный списывает 3 кредита. Остальные номера — 1 кредит.</p>
+        <input class="field" id="searchC" placeholder="Поиск страны…" />
+        <div class="select-grid" id="countries" style="margin-top:10px"></div>
+        <button class="btn btn-primary btn-block" id="genBtn" style="margin-top:14px" type="button">Сгенерировать номер</button>
+        <div class="msg" id="genMsg"></div>
+      </div>
+
+      <div class="card number-box">
+        <div class="pill" id="countryPill">номер не выбран</div>
+        <div class="e164" id="phoneView">+• ••• ••• ••••</div>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+          <button class="btn btn-ghost" id="copyPhone" type="button">Копировать номер</button>
+          <button class="btn btn-ghost" id="copyCode" type="button">Копировать код</button>
+        </div>
+        <div class="code-box">
+          <div style="font-size:12px;color:var(--muted);letter-spacing:.12em;font-weight:800">КОД ВХОДА</div>
+          <div class="code-digits" id="codeView">••••••</div>
+          <div class="timer" id="timerView">код появится после генерации</div>
+          <div class="bar"><span id="bar"></span></div>
+        </div>
+        <div class="list" id="myNumbers"></div>
+      </div>
+    </div>
+
+    <footer>
+      Демо: номера не принадлежат реальной телефонной сети. Не используй сервис для обхода чужих проверок, спама или обмана.
+    </footer>
+  </div>
+  <script type="module" src="js/dashboard.js"></script>
+</body>
+</html>

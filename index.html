@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BLACK — мессенджер с виртуальным номером</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="manifest" href="manifest.json" />
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="wrap">
+    <nav class="nav">
+      <div class="brand"><div class="logo">B</div> BLACK</div>
+      <div class="nav-links">
+        <a href="#how">Как это работает</a>
+        <a href="dashboard.html">Номера</a>
+        <a href="app.html">Открыть приложение</a>
+      </div>
+      <div>
+        <a class="btn btn-ghost" href="login.html">Вход</a>
+        <a class="btn btn-primary" href="login.html">Регистрация</a>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <div>
+        <div class="badge">демо-платформа · виртуальный номер · код каждые 20 сек</div>
+        <h1>Мессенджер<br />без своего SIM.</h1>
+        <p class="lead">
+          На сайте создаёшь аккаунт по почте и получаешь виртуальный номер любой страны.
+          В приложении вводишь номер и код с сайта — и ты внутри.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="login.html">Создать аккаунт</a>
+          <a class="btn btn-ghost" href="app.html">Открыть мессенджер</a>
+        </div>
+      </div>
+      <div class="phone-preview">
+        <div class="screen">
+          <div class="fake-status"><span>BLACK</span><span>21:04</span></div>
+          <div class="fake-chat">
+            <div class="bubble in">Привет! Номер с сайта подошёл</div>
+            <div class="bubble out">Да, код обновился через 20 секунд</div>
+            <div class="bubble in">Голосовое · 0:07</div>
+            <div class="bubble out">Кидаю фото из чата</div>
+            <div class="bubble in">Ок, звоню</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="features" id="how">
+      <div class="card">
+        <div class="icon">1</div>
+        <h3>Сайт</h3>
+        <p>Регистрация по почте. Генерация случайного номера выбранной страны. Анонимный +888 — за внутренние кредиты (демо-баланс).</p>
+      </div>
+      <div class="card">
+        <div class="icon">2</div>
+        <h3>Код</h3>
+        <p>На дашборде крутится 6-значный код: он меняется каждые 20 секунд и пишется в Firebase, чтобы приложение могло его проверить.</p>
+      </div>
+      <div class="card">
+        <div class="icon">3</div>
+        <h3>Приложение</h3>
+        <p>Выбираешь страну, вводишь сгенерированный номер, копируешь код с сайта — вход. Дальше чаты, звонки, медиа и настройки.</p>
+      </div>
+    </section>
+
+    <footer>
+      Это учебный прототип, не оператор связи. Номера виртуальные и не принимают настоящие SMS операторов.
+      Анонимные сервисы нельзя использовать, чтобы обходить законы, мошенничать или вредить другим людям.
+    </footer>
+  </div>
+</body>
+</html>

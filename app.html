@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>BLACK</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/app.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0a0a10" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+</head>
+<body>
+  <div class="app-shell" id="shell">
+    <!-- LOGIN -->
+    <section class="screen active" id="screen-login">
+      <div class="login-wrap">
+        <div class="ava" style="width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,#7a6bff,#22e0c2);color:#0b0b12">B</div>
+        <h1>Вход в BLACK</h1>
+        <p>Выбери страну и введи номер, который сгенерировал сайт. Код скопируй с дашборда — он меняется каждые 20 секунд.</p>
+        <label>Страна</label>
+        <select class="field" id="countrySel"></select>
+        <label>Номер телефона</label>
+        <input class="field" id="phoneInp" inputmode="tel" placeholder="+7 999 123 4567" />
+        <label>Код с сайта</label>
+        <input class="field" id="codeInp" inputmode="numeric" maxlength="6" placeholder="000000" />
+        <div class="err" id="loginErr"></div>
+        <button class="btn" id="loginBtn" type="button">Войти</button>
+        <button class="btn sec" type="button" onclick="location.href='dashboard.html'">Открыть сайт с кодом</button>
+      </div>
+    </section>
+
+    <!-- CHATS -->
+    <section class="screen" id="screen-chats">
+      <div class="topbar">
+        <h1>Чаты</h1>
+        <div style="display:flex;gap:8px">
+          <button class="icon-btn" id="newChatBtn" title="Новый чат">✎</button>
+        </div>
+      </div>
+      <input class="search" id="chatSearch" placeholder="Поиск" />
+      <div class="list" id="chatList"></div>
+    </section>
+
+    <!-- CHAT -->
+    <section class="screen" id="screen-chat">
+      <div class="chat-head">
+        <button class="icon-btn" id="backChats">←</button>
+        <div class="ava" id="chatAva">?</div>
+        <div class="who"><b id="chatName">Чат</b><small id="chatStatus">в сети</small></div>
+        <button class="icon-btn" id="audioCallBtn">☎</button>
+        <button class="icon-btn" id="videoCallBtn">▣</button>
+      </div>
+      <div class="msgs" id="msgs"></div>
+      <div class="composer">
+        <button class="icon-btn" id="attachBtn">＋</button>
+        <button class="icon-btn" id="voiceBtn">◉</button>
+        <textarea id="msgInp" rows="1" placeholder="Сообщение"></textarea>
+        <button class="send" id="sendBtn">➤</button>
+      </div>
+      <input class="hidden-file" id="fileInp" type="file" accept="image/*,video/*" />
+    </section>
+
+    <!-- CALLS -->
+    <section class="screen" id="screen-calls">
+      <div class="topbar"><h1>Звонки</h1></div>
+      <div class="list" id="callList"></div>
+    </section>
+
+    <!-- CONTACTS -->
+    <section class="screen" id="screen-contacts">
+      <div class="topbar"><h1>Люди</h1></div>
+      <div class="login-wrap" style="padding-top:8px">
+        <label>Найти по номеру</label>
+        <input class="field" id="findPhone" placeholder="+7999…" />
+        <button class="btn" id="findBtn" type="button">Начать чат</button>
+        <div class="err" id="findErr"></div>
+      </div>
+      <div class="list" id="peopleList"></div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="screen" id="screen-settings">
+      <div class="topbar"><h1>Настройки</h1></div>
+      <div class="settings">
+        <div class="profile-card">
+          <div class="ava" id="myAva">Я</div>
+          <h2 id="myName">Профиль</h2>
+          <div style="color:var(--muted);font-size:13px" id="myPhone"></div>
+          <button class="btn sec" id="editProfBtn" type="button" style="margin-top:12px">Изменить профиль</button>
+        </div>
+
+        <div class="section-title">Аккаунт</div>
+        <div class="set-group" id="setAccount"></div>
+        <div class="section-title">Безопасность</div>
+        <div class="set-group" id="setSec"></div>
+        <div class="section-title">Конфиденциальность</div>
+        <div class="set-group" id="setPriv"></div>
+        <div class="section-title">Оформление</div>
+        <div class="set-group" id="setTheme"></div>
+        <button class="btn sec" id="logoutBtn" type="button" style="background:#2a1218;color:#ff8aa0">Выйти</button>
+      </div>
+    </section>
+
+    <!-- PROFILE EDIT -->
+    <section class="screen" id="screen-profile">
+      <div class="chat-head">
+        <button class="icon-btn" id="backSet">←</button>
+        <div class="who"><b>Профиль</b><small>кастомизация</small></div>
+      </div>
+      <div class="login-wrap">
+        <label>Имя</label>
+        <input class="field" id="editName" />
+        <label>О себе</label>
+        <input class="field" id="editBio" placeholder="Коротко о себе" />
+        <label>Цвет аватара</label>
+        <input class="field" id="editColor" type="color" value="#6d5cff" />
+        <label>Эмодзи аватара</label>
+        <input class="field" id="editEmoji" maxlength="2" placeholder="✦" />
+        <button class="btn" id="saveProf" type="button">Сохранить</button>
+      </div>
+    </section>
+
+    <nav class="tabs" id="tabs">
+      <button data-tab="chats" class="active"><span>💬</span>Чаты</button>
+      <button data-tab="calls"><span>☎</span>Звонки</button>
+      <button data-tab="contacts"><span>◎</span>Люди</button>
+      <button data-tab="settings"><span>⚙</span>Ещё</button>
+    </nav>
+
+    <div class="call-overlay" id="callUI">
+      <div style="text-align:center">
+        <div class="call-ava" id="callAva">☎</div>
+        <h2 id="callName" style="margin-top:18px">Звонок</h2>
+        <p id="callState" style="color:var(--muted);margin-top:6px">соединение…</p>
+      </div>
+      <div class="call-actions">
+        <button class="call-btn mute" id="muteBtn">🔇</button>
+        <button class="call-btn end" id="endBtn">✕</button>
+      </div>
+    </div>
+    <div class="toast" id="toast"></div>
+  </div>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
