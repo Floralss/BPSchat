@@ -4,42 +4,54 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Вход — BLACK</title>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <div class="bg-grid"></div>
-  <div class="wrap">
-    <nav class="nav">
-      <a class="brand" href="index.html"><div class="logo">B</div> BLACK</a>
-      <a class="btn btn-ghost" href="index.html">На главную</a>
-    </nav>
+  <div class="fx"></div>
+  <div class="auth-page">
+    <section class="auth-brand">
+      <a class="brand" href="index.html"><span class="logo">B</span> BLACK</a>
+      <div>
+        <div class="kicker"><i></i> кабинет номеров</div>
+        <h2>Один вход по почте — и можно брать номер.</h2>
+        <p class="lead">После регистрации откроется генератор. Код с кабинета вставляется в приложение.</p>
+      </div>
+      <p style="color:var(--muted);font-size:13px">Почта нужна только сайту. В мессенджер заходишь уже номером.</p>
+    </section>
 
-    <div class="auth-grid">
-      <form class="card auth-card" id="regForm">
-        <h2>Регистрация</h2>
-        <p class="hint">Почта и пароль. После входа можно сгенерировать номер.</p>
-        <label>Имя</label>
-        <input class="field" id="regName" placeholder="Как к тебе обращаться" required />
-        <label>Почта</label>
-        <input class="field" id="regEmail" type="email" placeholder="you@mail.com" required />
-        <label>Пароль</label>
-        <input class="field" id="regPass" type="password" minlength="6" placeholder="минимум 6 символов" required />
-        <button class="btn btn-primary btn-block" style="margin-top:16px" type="submit">Создать аккаунт</button>
-        <div class="msg" id="regMsg"></div>
-      </form>
+    <section class="auth-panel">
+      <div class="auth-box">
+        <a class="brand" href="index.html"><span class="logo">B</span> BLACK</a>
+        <h1 style="font-family:var(--display);font-size:32px;letter-spacing:-.03em;margin:12px 0 4px">Добро пожаловать</h1>
+        <p style="color:var(--muted)">Создай аккаунт или войди в существующий.</p>
 
-      <form class="card auth-card" id="loginForm">
-        <h2>Вход</h2>
-        <p class="hint">Уже есть аккаунт — заходи и управляй номерами.</p>
-        <label>Почта</label>
-        <input class="field" id="logEmail" type="email" required />
-        <label>Пароль</label>
-        <input class="field" id="logPass" type="password" required />
-        <button class="btn btn-ok btn-block" style="margin-top:16px" type="submit">Войти</button>
-        <div class="msg" id="logMsg"></div>
-      </form>
-    </div>
+        <div class="tabs">
+          <button type="button" class="on" id="tabReg">Регистрация</button>
+          <button type="button" id="tabLog">Вход</button>
+        </div>
+
+        <form id="regForm">
+          <label for="regName">Имя</label>
+          <input class="field" id="regName" autocomplete="name" placeholder="Как к тебе обращаться" required />
+          <label for="regEmail">Почта</label>
+          <input class="field" id="regEmail" type="email" autocomplete="email" placeholder="you@mail.com" required />
+          <label for="regPass">Пароль</label>
+          <input class="field" id="regPass" type="password" minlength="6" autocomplete="new-password" placeholder="минимум 6 символов" required />
+          <button class="btn btn-primary btn-block btn-lg" style="margin-top:18px" type="submit">Создать аккаунт</button>
+          <div class="msg" id="regMsg"></div>
+        </form>
+
+        <form id="loginForm" hidden>
+          <label for="logEmail">Почта</label>
+          <input class="field" id="logEmail" type="email" autocomplete="email" required />
+          <label for="logPass">Пароль</label>
+          <input class="field" id="logPass" type="password" autocomplete="current-password" required />
+          <button class="btn btn-mint btn-block btn-lg" style="margin-top:18px" type="submit">Войти в кабинет</button>
+          <div class="msg" id="logMsg"></div>
+        </form>
+      </div>
+    </section>
   </div>
   <script type="module" src="js/auth-page.js"></script>
 </body>

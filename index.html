@@ -4,76 +4,177 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>BLACK — мессенджер с виртуальным номером</title>
+  <meta name="description" content="Сайт выдаёт виртуальный номер и код. Приложение принимает номер и код — дальше чаты и медиа." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="manifest" href="manifest.json" />
 </head>
 <body>
-  <div class="bg-grid"></div>
-  <div class="wrap">
-    <nav class="nav">
-      <div class="brand"><div class="logo">B</div> BLACK</div>
-      <div class="nav-links">
-        <a href="#how">Как это работает</a>
-        <a href="dashboard.html">Номера</a>
-        <a href="app.html">Открыть приложение</a>
-      </div>
-      <div>
-        <a class="btn btn-ghost" href="login.html">Вход</a>
-        <a class="btn btn-primary" href="login.html">Регистрация</a>
-      </div>
-    </nav>
+  <div class="fx"></div>
 
+  <header class="nav" id="nav">
+    <div class="container nav-in">
+      <a class="brand" href="index.html"><span class="logo">B</span> BLACK</a>
+      <nav class="nav-links">
+        <a href="#how">Как работает</a>
+        <a href="#numbers">Номера</a>
+        <a href="#app">Приложение</a>
+        <a href="#faq">Вопросы</a>
+      </nav>
+      <div class="nav-actions">
+        <a class="btn btn-ghost" href="login.html">Войти</a>
+        <a class="btn btn-primary" href="login.html">Создать аккаунт</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
     <section class="hero">
       <div>
-        <div class="badge">демо-платформа · виртуальный номер · код каждые 20 сек</div>
-        <h1>Мессенджер<br />без своего SIM.</h1>
-        <p class="lead">
-          На сайте создаёшь аккаунт по почте и получаешь виртуальный номер любой страны.
-          В приложении вводишь номер и код с сайта — и ты внутри.
-        </p>
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="login.html">Создать аккаунт</a>
-          <a class="btn btn-ghost" href="app.html">Открыть мессенджер</a>
+        <div class="kicker"><i></i> сайт + приложение · код каждые 20 секунд</div>
+        <h1>Мессенджер<br /><span>на виртуальном номере</span></h1>
+        <p class="lead">Регистрируешься на сайте по почте, получаешь номер любой страны и короткий код. В приложении вводишь то же самое — открываются чаты.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary btn-lg" href="login.html">Начать на сайте</a>
+          <a class="btn btn-ghost btn-lg" href="app.html">Открыть приложение</a>
+        </div>
+        <div class="hero-meta">
+          <div><b>50+</b>стран в генераторе</div>
+          <div><b>20 сек</b>жизнь кода</div>
+          <div><b>+888</b>анонимный тариф</div>
         </div>
       </div>
-      <div class="phone-preview">
-        <div class="screen">
-          <div class="fake-status"><span>BLACK</span><span>21:04</span></div>
-          <div class="fake-chat">
-            <div class="bubble in">Привет! Номер с сайта подошёл</div>
-            <div class="bubble out">Да, код обновился через 20 секунд</div>
-            <div class="bubble in">Голосовое · 0:07</div>
-            <div class="bubble out">Кидаю фото из чата</div>
-            <div class="bubble in">Ок, звоню</div>
+      <div class="device-wrap">
+        <div class="device-glow"></div>
+        <div class="device">
+          <div class="device-notch"></div>
+          <div class="device-screen">
+            <div class="dev-top">
+              <strong>Чаты</strong>
+              <span style="color:#8b90a5;font-size:12px">BLACK</span>
+            </div>
+            <div class="dev-chat">
+              <div class="bub in">Номер с сайта подошёл, код принял с первой попытки<small>21:02</small></div>
+              <div class="bub out">Да, он обновляется каждые 20 секунд<small>21:02</small></div>
+              <div class="bub in">голосовое · 0:07<small>21:03</small></div>
+              <div class="bub out">Слышно нормально. Наберу через минуту<small>21:04</small></div>
+            </div>
+            <div class="dev-bar"><span></span><b></b></div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="features" id="how">
-      <div class="card">
-        <div class="icon">1</div>
-        <h3>Сайт</h3>
-        <p>Регистрация по почте. Генерация случайного номера выбранной страны. Анонимный +888 — за внутренние кредиты (демо-баланс).</p>
+    <section class="section" id="how">
+      <div class="section-h">
+        <h2>Три шага, без SIM-карты</h2>
+        <p>Сайт выдаёт номер и код. Приложение проверяет их в той же базе.</p>
       </div>
-      <div class="card">
-        <div class="icon">2</div>
-        <h3>Код</h3>
-        <p>На дашборде крутится 6-значный код: он меняется каждые 20 секунд и пишется в Firebase, чтобы приложение могло его проверить.</p>
-      </div>
-      <div class="card">
-        <div class="icon">3</div>
-        <h3>Приложение</h3>
-        <p>Выбираешь страну, вводишь сгенерированный номер, копируешь код с сайта — вход. Дальше чаты, звонки, медиа и настройки.</p>
+      <div class="grid-3">
+        <article class="card">
+          <div class="step-num">1</div>
+          <h3>Аккаунт на почту</h3>
+          <p>Регистрация и вход по email. В кабинете видны кредиты и уже созданные номера.</p>
+        </article>
+        <article class="card">
+          <div class="step-num">2</div>
+          <h3>Номер и живой код</h3>
+          <p>Выбираешь страну — система собирает случайный номер. Шестизначный код меняется каждые 20 секунд.</p>
+        </article>
+        <article class="card">
+          <div class="step-num">3</div>
+          <h3>Вход в мессенджер</h3>
+          <p>В приложении та же страна, тот же номер, свежий код. Дальше чаты, медиа и настройки.</p>
+        </article>
       </div>
     </section>
 
-    <footer>
-      Это учебный прототип, не оператор связи. Номера виртуальные и не принимают настоящие SMS операторов.
-      Анонимные сервисы нельзя использовать, чтобы обходить законы, мошенничать или вредить другим людям.
-    </footer>
-  </div>
+    <section class="section" id="numbers">
+      <div class="section-h">
+        <h2>Виртуальные номера</h2>
+        <p>Обычные направления — 1 кредит. Анонимный +888 — 3 кредита. Пополнение в кабинете учебное.</p>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="panel-row"><div><b>Россия, +7</b><div style="color:var(--muted);font-size:13px">случайный 10-значный</div></div><span class="tag">1 кредит</span></div>
+          <div class="panel-row"><div><b>США / Канада, +1</b><div style="color:var(--muted);font-size:13px">формат как у обычного номера</div></div><span class="tag">1 кредит</span></div>
+          <div class="panel-row"><div><b>Европа и Азия</b><div style="color:var(--muted);font-size:13px">Германия, Франция, Япония и ещё десятки стран</div></div><span class="tag">1 кредит</span></div>
+          <div class="panel-row"><div><b>Анонимный +888</b><div style="color:var(--muted);font-size:13px">отдельный пул, без привязки к стране</div></div><span class="tag gold">3 кредита</span></div>
+        </div>
+        <div class="card">
+          <h3>Как выглядит код</h3>
+          <p>На дашборде крупно номер и шесть цифр. Полоска показывает, сколько осталось до смены.</p>
+          <div class="code-stage" style="margin-top:18px">
+            <div style="font-size:12px;letter-spacing:.14em;color:var(--muted);font-weight:800">ПРИМЕР</div>
+            <div class="code-digits">482917</div>
+            <div class="timer">живой код появляется после генерации</div>
+          </div>
+          <a class="btn btn-primary btn-block" style="margin-top:16px" href="login.html">Открыть кабинет</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="app">
+      <div class="section-h">
+        <h2>Что внутри приложения</h2>
+        <p>Веб-мессенджер. На телефоне страницу можно поставить на домашний экран.</p>
+      </div>
+      <div class="grid-3">
+        <article class="card"><h3>Чаты</h3><p>Список диалогов, поиск, переписка и живые чаты по номеру через Firebase.</p></article>
+        <article class="card"><h3>Медиа</h3><p>Фото и видео из галереи, запись голосовых с микрофона, превью в ленте.</p></article>
+        <article class="card"><h3>Звонки и профиль</h3><p>Экран звонка, вкладки безопасности и оформление профиля.</p></article>
+      </div>
+    </section>
+
+    <section class="section faq" id="faq">
+      <div class="section-h"><h2>Коротко по делу</h2></div>
+      <details open>
+        <summary>Это настоящие номера операторов?</summary>
+        <p>Нет. Номера виртуальные и живут только внутри BLACK. На них не приходят SMS с других сайтов.</p>
+      </details>
+      <details>
+        <summary>Почему код всё время меняется?</summary>
+        <p>Код живёт 20 секунд, затем база получает новый. В приложение нужно вставлять свежий.</p>
+      </details>
+      <details>
+        <summary>Можно поставить на телефон?</summary>
+        <p>Открой приложение в браузере телефона и добавь страницу на домашний экран. Отдельного файла из магазина приложений здесь нет.</p>
+      </details>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="foot-grid">
+        <div>
+          <div class="brand"><span class="logo">B</span> BLACK</div>
+          <p style="margin-top:12px">Сайт выдаёт номер. Приложение принимает код. Одна база на оба экрана.</p>
+        </div>
+        <div>
+          <b style="color:var(--text)">Продукт</b>
+          <a href="login.html">Кабинет</a>
+          <a href="app.html">Приложение</a>
+          <a href="dashboard.html">Номера</a>
+        </div>
+        <div>
+          <b style="color:var(--text)">Разделы</b>
+          <a href="#how">Как работает</a>
+          <a href="#numbers">Тарифы</a>
+          <a href="#faq">Вопросы</a>
+        </div>
+        <div>
+          <b style="color:var(--text)">Аккаунт</b>
+          <a href="login.html">Вход</a>
+          <a href="login.html">Регистрация</a>
+        </div>
+      </div>
+      <p class="legal">Учебный сервис, не оператор связи. Не используй виртуальные номера, чтобы обходить чужие проверки, рассылать спам или обманывать людей.</p>
+    </div>
+  </footer>
+  <script>
+    const nav = document.getElementById("nav");
+    addEventListener("scroll", () => nav.classList.toggle("scrolled", scrollY > 8), { passive: true });
+  </script>
 </body>
 </html>
