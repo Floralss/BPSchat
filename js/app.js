@@ -21,41 +21,14 @@ const SESSION_KEY = "black_session";
 let session = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
 let currentChat = null;
 let unsubMsgs = null;
-let prefs = {
+let prefs = JSON.parse(localStorage.getItem("black_prefs") || "null") || {
   twoFA: true,
   lastSeen: true,
   readReceipts: true,
   calls: true,
   preview: false,
   lock: false,
-};
-
-const DEMO_PEOPLE = [
-  { id: "demo_nova", name: "Nova", emoji: "✦", sub: "онлайн", last: "Кинула голосовое", time: "сейчас", unread: 2 },
-  { id: "demo_leo", name: "Leo", emoji: "⚡", sub: "был(а) недавно", last: "Ок, наберу вечером", time: "12:40", unread: 0 },
-  { id: "demo_mira", name: "Mira", emoji: "◇", sub: "в сети", last: "Фото из студии", time: "вчера", unread: 1 },
-  { id: "demo_support", name: "BLACK Support", emoji: "B", sub: "бот", last: "Как пользоваться кодом", time: "пн", unread: 0 },
-];
-
-const DEMO_THREADS = {
-  demo_nova: [
-    { from: "you", text: "Привет! Зашла по виртуальному номеру", t: "21:01" },
-    { from: "me", text: "Работает. Код с сайта обновился как раз вовремя", t: "21:02" },
-    { from: "you", text: "Голосовое · 0:07", t: "21:03", voice: true },
-    { from: "me", text: "Слышу отлично", t: "21:03" },
-  ],
-  demo_leo: [
-    { from: "you", text: "Созвонимся?", t: "12:38" },
-    { from: "me", text: "Ок, наберу вечером", t: "12:40" },
-  ],
-  demo_mira: [
-    { from: "you", text: "Смотри кадр", t: "вчера" },
-    { from: "me", text: "Красиво. Кидай ещё", t: "вчера" },
-  ],
-  demo_support: [
-    { from: "you", text: "1) На сайте войди по почте.\n2) Сгенерируй номер.\n3) Скопируй код (20 сек).\n4) Вставь сюда.", t: "пн" },
-    { from: "you", text: "Это учебный прототип: номера не принимают настоящие SMS операторов.", t: "пн" },
-  ],
+  hidePhone: false,
 };
 
 init();
@@ -82,14 +55,10 @@ async function init() {
   $("muteBtn").onclick = () => toast("микрофон переключён (демо)");
   $("newChatBtn").onclick = () => show("contacts");
   $("findBtn").onclick = startChatByPhone;
-  $("editProfBtn").onclick = () => {
-    $("editName").value = session?.name || "";
-    $("editBio").value = session?.bio || "";
-    $("editColor").value = session?.color || "#6d5cff";
-    $("editEmoji").value = session?.emoji || "✦";
-    show("profile");
-  };
+  $("editProfBtn").onclick = openProfileEdit;
   $("saveProf").onclick = saveProfile;
+  $("pickAvaBtn").onclick = () => $("avaInp").click();
+  $("avaInp").onchange = onPickAvatar;
   $("logoutBtn").onclick = logout;
   $("chatSearch").oninput = renderChatList;
   setupPWA();
@@ -276,7 +245,9 @@ async function login() {
     session = {
       e164,
       name: "User",
-      emoji: paid ? "◈" : "✦",
+      username: "user",
+      photo: "",
+      hidePhone: false,
       color: paid ? "#22e0c2" : "#6d5cff",
       bio: "",
       country: selectedCountry().name,
@@ -309,50 +280,73 @@ async function ensureAnonAuth() {
   }
 }
 
+function publicPhone() {
+  if (session?.hidePhone || prefs.hidePhone) return "номер скрыт";
+  return prettyPhone(session?.e164 || "");
+}
+
 function enterApp() {
-  $("myName").textContent = session.name;
-  $("myPhone").textContent = prettyPhone(session.e164);
+  $("myName").textContent = session.name || "Профиль";
+  $("myUser").textContent = "@" + (session.username || "user");
+  $("myPhone").textContent = publicPhone();
   paintAva($("myAva"), session);
   $("tabs").hidden = false;
   show("chats");
 }
 
 function paintAva(el, who) {
-  el.textContent = (who.emoji || who.name || "?").toString().slice(0, 2);
-  el.style.background = `linear-gradient(135deg, ${who.color || "#3a3470"}, #1d1b33)`;
+  if (!el) return;
+  if (who?.photo) {
+    el.innerHTML = `<img alt="" src="${who.photo}" />`;
+    el.style.background = "#1d1b33";
+    return;
+  }
+  const letter = (who?.name || who?.username || "?").toString().replace("@", "").slice(0, 1).toUpperCase();
+  el.textContent = letter;
+  el.style.background = `linear-gradient(135deg, ${who?.color || "#6d5cff"}, #1d1b33)`;
+}
+
+function myChats() {
+  return JSON.parse(localStorage.getItem("black_extra_chats") || "[]");
+}
+
+function emptyBox(title, text) {
+  return `<div class="empty"><b>${title}</b>${text}</div>`;
 }
 
 function renderChatList() {
   const q = ($("chatSearch").value || "").toLowerCase();
-  const extra = JSON.parse(localStorage.getItem("black_extra_chats") || "[]");
-  const items = [...extra, ...DEMO_PEOPLE].filter(
-    (c) => !q || c.name.toLowerCase().includes(q) || (c.last || "").toLowerCase().includes(q)
+  const items = myChats().filter(
+    (c) => !q || (c.name || "").toLowerCase().includes(q) || (c.last || "").toLowerCase().includes(q)
   );
+  if (!items.length) {
+    $("chatList").innerHTML = emptyBox("Пока пусто", "Нажми + и найди человека по номеру или username.");
+    return;
+  }
   $("chatList").innerHTML = items
     .map(
       (c) => `<div class="chat-item" data-id="${c.id}">
-        <div class="ava ${c.sub === "онлайн" || c.sub === "в сети" ? "online" : ""}">${c.emoji || c.name[0]}</div>
+        <div class="ava" data-ava="${c.id}"></div>
         <div class="meta">
           <div class="name"><span>${c.name}</span><span class="time">${c.time || ""}</span></div>
-          <div class="sub">${c.last || ""}</div>
+          <div class="sub">${c.last || "Нет сообщений"}</div>
         </div>
-        ${c.unread ? `<span class="unread">${c.unread}</span>` : ""}
       </div>`
     )
     .join("");
   $("chatList").querySelectorAll(".chat-item").forEach((el) => {
+    const person = myChats().find((p) => p.id === el.dataset.id);
+    paintAva(el.querySelector(".ava"), person);
     el.onclick = () => openChat(el.dataset.id);
   });
 }
 
 function openChat(id) {
   currentChat = id;
-  const extra = JSON.parse(localStorage.getItem("black_extra_chats") || "[]");
-  const person = [...extra, ...DEMO_PEOPLE].find((p) => p.id === id) || {
+  const person = myChats().find((p) => p.id === id) || {
     id,
     name: id,
-    emoji: "◎",
-    sub: "виртуальный чат",
+    sub: "",
   };
   $("chatName").textContent = person.name;
   $("chatStatus").textContent = person.sub || "BLACK";
@@ -365,8 +359,7 @@ function openChat(id) {
 function renderMessages() {
   const localKey = `black_thread_${currentChat}`;
   const saved = JSON.parse(localStorage.getItem(localKey) || "null");
-  const seed = DEMO_THREADS[currentChat] || [];
-  const list = saved || seed;
+  const list = saved || [];
   $("msgs").innerHTML = list
     .map((m) => {
       if (m.sys) return `<div class="sys">${escapeHtml(m.text)}</div>`;
@@ -383,7 +376,7 @@ function renderMessages() {
 
 function persistMsg(m) {
   const localKey = `black_thread_${currentChat}`;
-  const seed = JSON.parse(localStorage.getItem(localKey) || "null") || DEMO_THREADS[currentChat] || [];
+  const seed = JSON.parse(localStorage.getItem(localKey) || "null") || [];
   seed.push(m);
   localStorage.setItem(localKey, JSON.stringify(seed));
   renderMessages();
@@ -499,20 +492,20 @@ async function pushLive(m) {
 async function startChatByPhone() {
   const err = $("findErr");
   err.textContent = "";
-  const e164 = normalizePhone($("findPhone").value);
-  if (e164.length < 8) {
-    err.textContent = "Введи номер.";
+  const raw = String($("findPhone").value || "").trim();
+  const key = raw.startsWith("@") ? raw.toLowerCase() : normalizePhone(raw);
+  if (key.length < 2) {
+    err.textContent = "Введи номер или username.";
     return;
   }
+  const e164 = key;
   const id = "live_" + [sanitize(session.e164), sanitize(e164)].sort().join("__");
   const extra = JSON.parse(localStorage.getItem("black_extra_chats") || "[]");
   if (!extra.some((c) => c.id === id)) {
     extra.unshift({
       id,
-      name: prettyPhone(e164),
-      emoji: "◎",
-      sub: "новый чат",
-      last: "Начало переписки",
+      name: e164.startsWith("@") ? e164 : prettyPhone(e164),
+      last: "",
       time: nowTime(),
       unread: 0,
     });
@@ -528,27 +521,19 @@ async function startChatByPhone() {
 }
 
 function renderPeople() {
-  $("peopleList").innerHTML = DEMO_PEOPLE.map(
-    (p) => `<div class="chat-item" data-id="${p.id}">
-      <div class="ava">${p.emoji}</div>
-      <div class="meta"><div class="name"><span>${p.name}</span></div><div class="sub">${p.sub}</div></div>
-    </div>`
-  ).join("");
-  $("peopleList").querySelectorAll(".chat-item").forEach((el) => {
-    el.onclick = () => openChat(el.dataset.id);
-  });
+  $("peopleList").innerHTML = emptyBox("Контактов нет", "Никого не подставляем. Добавь человека по номеру.");
 }
 
 function renderCalls() {
-  const rows = [
-    { name: "Nova", sub: "исходящий · 2 мин", t: "сегодня" },
-    { name: "Leo", sub: "пропущенный", t: "вчера" },
-    { name: "Mira", sub: "входящий · видео 4 мин", t: "пн" },
-  ];
+  const rows = JSON.parse(localStorage.getItem("black_calls") || "[]");
+  if (!rows.length) {
+    $("callList").innerHTML = emptyBox("Звонков нет", "Когда позвонишь — история появится здесь.");
+    return;
+  }
   $("callList").innerHTML = rows
     .map(
       (c) => `<div class="chat-item">
-        <div class="ava">${c.name[0]}</div>
+        <div class="ava">${(c.name || "?")[0]}</div>
         <div class="meta"><div class="name"><span>${c.name}</span><span class="time">${c.t}</span></div><div class="sub">${c.sub}</div></div>
       </div>`
     )
@@ -561,17 +546,19 @@ function item(title, rightHtml) {
 
 function renderSettings() {
   $("myName").textContent = session?.name || "Профиль";
-  $("myPhone").textContent = prettyPhone(session?.e164 || "");
-  paintAva($("myAva"), session || { emoji: "Я" });
+  $("myUser").textContent = "@" + (session?.username || "user");
+  $("myPhone").textContent = publicPhone();
+  paintAva($("myAva"), session || { name: "Я" });
   $("setAccount").innerHTML =
-    item("Номер", prettyPhone(session?.e164 || "—")) +
-    item("Страна", session?.country || "—") +
-    item("Имя", session?.name || "—");
+    item("Номер", publicPhone()) +
+    item("Username", "@" + (session?.username || "user")) +
+    item("Страна", session?.country || "—");
   $("setSec").innerHTML =
     switchRow("Код на сайте", "twoFA") +
     switchRow("Блокировка приложения", "lock") +
-    item("Активные сессии", "это устройство");
+    item("Сессия", "это устройство");
   $("setPriv").innerHTML =
+    switchRow("Скрыть мой номер", "hidePhone") +
     switchRow("Время последнего визита", "lastSeen") +
     switchRow("Отчёты о прочтении", "readReceipts") +
     switchRow("Звонки от всех", "calls") +
@@ -591,15 +578,57 @@ function bindSwitches() {
       prefs[k] = !prefs[k];
       b.classList.toggle("on", prefs[k]);
       localStorage.setItem("black_prefs", JSON.stringify(prefs));
+      if (k === "hidePhone" && session) {
+        session.hidePhone = prefs.hidePhone;
+        localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+        renderSettings();
+      }
     };
   });
 }
 
+function openProfileEdit() {
+  $("editName").value = session?.name || "";
+  $("editUser").value = session?.username || "";
+  $("editBio").value = session?.bio || "";
+  $("editColor").value = session?.color || "#6d5cff";
+  $("hidePhone").checked = !!(session?.hidePhone || prefs.hidePhone);
+  paintAva($("editAva"), session);
+  show("profile");
+}
+
+function onPickAvatar(e) {
+  const file = e.target.files?.[0];
+  e.target.value = "";
+  if (!file || !file.type.startsWith("image")) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 256;
+      canvas.height = 256;
+      const ctx = canvas.getContext("2d");
+      const side = Math.min(img.width, img.height);
+      const sx = (img.width - side) / 2;
+      const sy = (img.height - side) / 2;
+      ctx.drawImage(img, sx, sy, side, side, 0, 0, 256, 256);
+      session.photo = canvas.toDataURL("image/jpeg", 0.82);
+      paintAva($("editAva"), session);
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 async function saveProfile() {
   session.name = $("editName").value.trim() || session.name;
+  session.username = ($("editUser").value || "user").trim().replace(/^@/, "").replace(/[^\w.]/g, "").slice(0, 24) || "user";
   session.bio = $("editBio").value.trim();
   session.color = $("editColor").value;
-  session.emoji = $("editEmoji").value.trim() || session.emoji;
+  session.hidePhone = $("hidePhone").checked;
+  prefs.hidePhone = session.hidePhone;
+  localStorage.setItem("black_prefs", JSON.stringify(prefs));
   localStorage.setItem(SESSION_KEY, JSON.stringify(session));
   try {
     await update(ref(db, `directory/${sanitize(session.e164)}`), {
@@ -619,6 +648,9 @@ function startCall(video) {
   $("callAva").textContent = $("chatAva").textContent;
   $("callState").textContent = video ? "видеозвонок · соединение…" : "аудиозвонок · соединение…";
   $("callUI").classList.add("show");
+  const hist = JSON.parse(localStorage.getItem("black_calls") || "[]");
+  hist.unshift({ name, sub: video ? "исходящий видео" : "исходящий", t: nowTime() });
+  localStorage.setItem("black_calls", JSON.stringify(hist.slice(0, 30)));
   setTimeout(() => {
     if ($("callUI").classList.contains("show")) $("callState").textContent = "идёт разговор · 00:05";
   }, 1200);
