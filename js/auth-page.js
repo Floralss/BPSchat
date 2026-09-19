@@ -43,7 +43,7 @@ regForm.addEventListener("submit", async (e) => {
     await set(ref(db, `users/${cred.user.uid}`), {
       email,
       displayName: name,
-      credits: 5,
+      credits: 3,
       createdAt: Date.now(),
       theme: "dark",
       bio: "",
