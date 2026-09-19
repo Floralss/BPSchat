@@ -237,7 +237,7 @@ label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); 
 .stat b { display: block; font-size: 26px; margin-top: 4px; letter-spacing: -0.03em; }
 .work { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .search { margin: 8px 0 10px; }
-.countries { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 340px; overflow: auto; padding-right: 4px; }
+.countries { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; min-height: 180px; max-height: 340px; overflow: auto; padding-right: 4px; }
 .country {
   background: #0d1018; border: 1px solid var(--line); border-radius: 12px;
   padding: 10px 12px; text-align: left; display: flex; justify-content: space-between; gap: 8px; font-size: 13px;

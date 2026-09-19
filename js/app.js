@@ -151,12 +151,19 @@ async function login() {
     return;
   }
   try {
-    const snap = await get(ref(db, `virtualNumbers/${sanitize(e164)}`));
-    if (!snap.exists()) {
-      err.textContent = "Номер не найден. Сначала сгенерируй его на сайте.";
+    let rec = null;
+    try {
+      const local = localStorage.getItem(`black_virtual_${sanitize(e164)}`);
+      if (local) rec = JSON.parse(local);
+    } catch (_) {}
+    try {
+      const snap = await get(ref(db, `virtualNumbers/${sanitize(e164)}`));
+      if (snap.exists()) rec = snap.val();
+    } catch (_) {}
+    if (!rec) {
+      err.textContent = "Номер не найден. Сначала выпусти его на сайте.";
       return;
     }
-    const rec = snap.val();
     if (String(rec.currentCode) !== code) {
       err.textContent = "Код неверный или уже обновился. Скопируй свежий с сайта.";
       return;
